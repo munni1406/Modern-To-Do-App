@@ -29,24 +29,31 @@ const verifyToken = (req, res, next) => {
 // Signup Route
 app.post('/api/signup', async (req, res) => {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ error: 'All fields are required' });
+    console.log(`Signup attempt for: ${email}`);
+
+    if (!name || !email || !password) {
+        return res.status(400).json({ error: 'All fields (name, email, password) are required' });
+    }
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         
         db.run(`INSERT INTO users (name, email, password) VALUES (?, ?, ?)`, [name, email, hashedPassword], function(err) {
             if (err) {
+                console.error('Database error during signup:', err.message);
                 if (err.message.includes('UNIQUE constraint failed')) {
                     return res.status(400).json({ error: 'Email already exists' });
                 }
-                return res.status(500).json({ error: 'Database error' });
+                return res.status(500).json({ error: 'Failed to create user account' });
             }
             
+            console.log(`User created successfully with ID: ${this.lastID}`);
             const token = jwt.sign({ id: this.lastID, email }, SECRET_KEY, { expiresIn: '1h' });
             res.status(201).json({ token, user: { id: this.lastID, name, email } });
         });
     } catch (err) {
-        res.status(500).json({ error: 'Server error' });
+        console.error('Server error during signup:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 

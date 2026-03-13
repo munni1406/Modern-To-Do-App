@@ -27,7 +27,10 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || 'Login failed' };
+      console.error('Login error:', error);
+      const message = error.response?.data?.error || 
+                     (error.code === 'ERR_NETWORK' ? 'Cannot connect to server. Is the backend running?' : 'Login failed');
+      return { success: false, message };
     }
   };
 
@@ -41,7 +44,10 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.response?.data?.error || 'Signup failed' };
+      console.error('Signup error:', error);
+      const message = error.response?.data?.error || 
+                     (error.code === 'ERR_NETWORK' ? 'Cannot connect to server. Is the backend running?' : 'Signup failed');
+      return { success: false, message };
     }
   };
 

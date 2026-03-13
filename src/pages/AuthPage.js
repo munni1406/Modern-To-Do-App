@@ -18,17 +18,42 @@ const AuthPage = () => {
     e.preventDefault();
     setError('');
     
-    if (!email || !password || (!isLogin && !name)) {
-      setError('Please fill in all fields');
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    
+    // Basic validation
+    if (!isLogin && !trimmedName) {
+      setError('Name is required');
+      return;
+    }
+    
+    if (!trimmedEmail) {
+      setError('Email is required');
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
+    if (!password) {
+      setError('Password is required');
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
       return;
     }
 
     setLoading(true);
     let result;
     if (isLogin) {
-      result = await login(email, password);
+      result = await login(trimmedEmail, password);
     } else {
-      result = await signup(name, email, password);
+      result = await signup(trimmedName, trimmedEmail, password);
     }
 
     if (result.success) {
@@ -78,7 +103,9 @@ const AuthPage = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="Enter your password (min 6 characters)"
+              required
+              minLength={6}
             />
           </div>
           
