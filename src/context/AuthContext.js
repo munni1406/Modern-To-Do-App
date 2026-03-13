@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/login', { email, password });
+      const response = await axios.post('/api/login', { email, password });
       const { token: newToken, user: userData } = response.data;
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -28,15 +28,21 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      const message = error.response?.data?.error || 
-                     (error.code === 'ERR_NETWORK' ? 'Cannot connect to server. Is the backend running?' : 'Login failed');
+      let message = 'Login failed';
+      if (error.response) {
+        message = error.response.data?.error || `Server error (${error.response.status})`;
+      } else if (error.code === 'ERR_NETWORK') {
+        message = 'Cannot connect to server. Is the backend running?';
+      } else {
+        message = error.message;
+      }
       return { success: false, message };
     }
   };
 
   const signup = async (name, email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/signup', { name, email, password });
+      const response = await axios.post('/api/signup', { name, email, password });
       const { token: newToken, user: userData } = response.data;
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -45,8 +51,14 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Signup error:', error);
-      const message = error.response?.data?.error || 
-                     (error.code === 'ERR_NETWORK' ? 'Cannot connect to server. Is the backend running?' : 'Signup failed');
+      let message = 'Signup failed';
+      if (error.response) {
+        message = error.response.data?.error || `Server error (${error.response.status})`;
+      } else if (error.code === 'ERR_NETWORK') {
+        message = 'Cannot connect to server. Is the backend running?';
+      } else {
+        message = error.message;
+      }
       return { success: false, message };
     }
   };

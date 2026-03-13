@@ -8,10 +8,14 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^7.13.1",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "concurrently": "^8.2.2"
   },
+  "proxy": "http://localhost:5000",
   "scripts": {
     "start": "react-scripts start",
+    "server": "cd server && npm start",
+    "dev": "concurrently \"npm start\" \"npm run server\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

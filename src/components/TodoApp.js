@@ -34,7 +34,7 @@ const TodoApp = () => {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/todos', {
+        const res = await axios.get('/api/todos', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTodos(res.data);
@@ -57,7 +57,7 @@ const TodoApp = () => {
     
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/todos',
+        '/api/todos',
         { task: inputValue.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -89,7 +89,7 @@ const TodoApp = () => {
     
     try {
       await axios.put(
-        `http://localhost:5000/api/todos/${id}`,
+        `/api/todos/${id}`,
         { completed: newCompletedState },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -108,7 +108,7 @@ const TodoApp = () => {
     setTodos(todos.filter(todo => todo.id !== id));
     
     try {
-      await axios.delete(`http://localhost:5000/api/todos/${id}`, {
+      await axios.delete(`/api/todos/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (err) {
@@ -129,7 +129,7 @@ const TodoApp = () => {
     
     try {
       await axios.put(
-        `http://localhost:5000/api/todos/${id}`,
+        `/api/todos/${id}`,
         { task: newText },
         { headers: { Authorization: `Bearer ${token}` } }
       );

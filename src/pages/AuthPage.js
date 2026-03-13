@@ -74,32 +74,37 @@ const AuthPage = () => {
         
         {error && <div className="auth-error">{error}</div>}
         
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="auth-form" noValidate>
           {!isLogin && (
             <div className="form-group">
-              <label>Name</label>
+              <label htmlFor="auth-name">Name</label>
               <input
+                id="auth-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your name"
+                required
               />
             </div>
           )}
           
           <div className="form-group">
-            <label>Email</label>
+            <label htmlFor="auth-email">Email</label>
             <input
+              id="auth-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              required
             />
           </div>
           
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="auth-password">Password</label>
             <input
+              id="auth-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -109,7 +114,11 @@ const AuthPage = () => {
             />
           </div>
           
-          <button type="submit" className="auth-btn" disabled={loading}>
+          <button 
+            type="submit" 
+            className="auth-btn" 
+            disabled={loading}
+          >
             {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Sign Up')}
           </button>
         </form>
