@@ -4,6 +4,9 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import TodoItem from './TodoItem';
 
+// Talk directly to the backend — bypasses CRA proxy to avoid 405 errors
+const API = axios.create({ baseURL: 'http://localhost:5000' });
+
 const TodoApp = () => {
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -34,7 +37,7 @@ const TodoApp = () => {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const res = await axios.get('/api/todos', {
+        const res = await API.get('/api/todos', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTodos(res.data);
@@ -56,7 +59,7 @@ const TodoApp = () => {
     if (inputValue.trim() === '') return;
     
     try {
-      const res = await axios.post(
+      const res = await API.post(
         '/api/todos',
         { task: inputValue.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -88,7 +91,7 @@ const TodoApp = () => {
     ));
     
     try {
-      await axios.put(
+      await API.put(
         `/api/todos/${id}`,
         { completed: newCompletedState },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -108,7 +111,7 @@ const TodoApp = () => {
     setTodos(todos.filter(todo => todo.id !== id));
     
     try {
-      await axios.delete(`/api/todos/${id}`, {
+      await API.delete(`/api/todos/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (err) {
@@ -128,7 +131,7 @@ const TodoApp = () => {
     ));
     
     try {
-      await axios.put(
+      await API.put(
         `/api/todos/${id}`,
         { task: newText },
         { headers: { Authorization: `Bearer ${token}` } }

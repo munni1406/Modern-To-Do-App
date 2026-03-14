@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Talk directly to the backend — bypasses CRA proxy to avoid 405 errors
+const API = axios.create({ baseURL: 'http://localhost:5000' });
+
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
@@ -19,7 +22,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/login', { email, password });
+      const response = await API.post('/api/login', { email, password });
       const { token: newToken, user: userData } = response.data;
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -42,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (name, email, password) => {
     try {
-      const response = await axios.post('/api/signup', { name, email, password });
+      const response = await API.post('/api/signup', { name, email, password });
       const { token: newToken, user: userData } = response.data;
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(userData));
