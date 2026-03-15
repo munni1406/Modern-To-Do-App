@@ -1,12 +1,19 @@
 const express = require("express");
 const cors = require("cors");
+const http = require("http");
+const WebSocket = require("ws");
 const db = require("./db");
 
 const app = express();
-app.use(express.json());
-app.use(cors());
 
-// Create users table if it doesn't exist
+// Middleware
+app.use(express.json());
+app.use(cors({
+    origin: ['https://modern-to-do-app-eight.vercel.app', 'http://localhost:3000'],
+    credentials: true
+}));
+
+// --- DATABASE TABLES ---
 db.run(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,6 +21,8 @@ db.run(`
     email TEXT UNIQUE
   )
 `);
+
+// --- REST API ROUTES ---
 
 // GET all users
 app.get("/users", (req, res) => {
@@ -42,23 +51,17 @@ app.post("/add-user", (req, res) => {
     );
 });
 
-app.listen(4000, () => {
-    console.log("database.db server running on port 4000");
+// Dummy Signup Route (from the pasted snippet)
+app.post('/api/signup', (req, res) => {
+    res.status(200).send('Signup successful');
 });
 
-
-const express = require("express");
-const http = require("http");
-const WebSocket = require("ws");
-
-const App = express();
+// --- HTTP & WEBSOCKET SETUP ---
 const server = http.createServer(app);
-
 const wss = new WebSocket.Server({ server, path: "/ws" });
 
 wss.on("connection", (ws) => {
-    console.log("Client connected");
-
+    console.log("WebSocket client connected");
     ws.send("Connected to WebSocket server");
 
     ws.on("message", (message) => {
@@ -66,10 +69,14 @@ wss.on("connection", (ws) => {
     });
 
     ws.on("close", () => {
-        console.log("Client disconnected");
+        console.log("WebSocket client disconnected");
     });
 });
 
-server.listen(3000, () => {
-    console.log("Server running on port 3000");
+// Start the server on port 4000
+// (Note: Port 3000 and 5000 might be used by the frontend or main backend)
+const PORT = 4000;
+server.listen(PORT, () => {
+    console.log(`Consolidated server running on port ${PORT}`);
+    console.log(`WebSocket server available at ws://localhost:${PORT}/ws`);
 });
