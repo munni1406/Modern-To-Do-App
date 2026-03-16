@@ -5,14 +5,14 @@ import { useAuth } from '../context/AuthContext';
 import TodoItem from './TodoItem';
 
 // Talk directly to the backend — bypasses CRA proxy to avoid 405 errors
-const API = axios.create({ baseURL: 'http://localhost:5000' });
+const API = axios.create({ baseURL: 'http://localhost:5000/api/data' });
 
 const TodoApp = () => {
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [filter, setFilter] = useState('all'); // all, active, completed
   const { token, user, logout } = useAuth();
-  
+
   // Theme state
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -45,10 +45,25 @@ const TodoApp = () => {
         console.error('Failed to fetch todos', err);
       }
     };
+
+    // const authToken = localStorage.getItem('jwtToken'); // Or wherever your token is stored
+
+    // axios.get('http://localhost:5000/api/todos', {
+    //   headers: {
+    //     'Authorization': `Bearer ${authToken}` // Ensure this is correctly formatted
+    //   }
+    // })
+    //   .then(response => {
+    //     console.log(response.data);
+    //   })
+    //   .catch(error => {
+    //     console.error('Error fetching todos:', error);
+    //   });
     if (token) {
       fetchTodos();
     }
   }, [token]);
+
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
@@ -57,21 +72,21 @@ const TodoApp = () => {
   const handleAddTodo = async (e) => {
     e.preventDefault();
     if (inputValue.trim() === '') return;
-    
+
     try {
       const res = await API.post(
         '/api/todos',
         { task: inputValue.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       const newTodo = {
         id: res.data.id,
         task: res.data.task,
         completed: res.data.completed ? 1 : 0,
         created_at: new Date().toISOString()
       };
-      
+
       setTodos([newTodo, ...todos]);
       setInputValue('');
     } catch (err) {
@@ -82,14 +97,14 @@ const TodoApp = () => {
   const toggleTodo = async (id) => {
     const todoToToggle = todos.find(todo => todo.id === id);
     if (!todoToToggle) return;
-    
+
     const newCompletedState = todoToToggle.completed ? 0 : 1;
-    
+
     // Optimistic update
-    setTodos(todos.map(todo => 
+    setTodos(todos.map(todo =>
       todo.id === id ? { ...todo, completed: newCompletedState } : todo
     ));
-    
+
     try {
       await API.put(
         `/api/todos/${id}`,
@@ -99,7 +114,7 @@ const TodoApp = () => {
     } catch (err) {
       console.error('Failed to toggle todo', err);
       // Revert if failed
-      setTodos(todos.map(todo => 
+      setTodos(todos.map(todo =>
         todo.id === id ? { ...todo, completed: todoToToggle.completed } : todo
       ));
     }
@@ -109,7 +124,7 @@ const TodoApp = () => {
     // Optimistic update
     const previousTodos = [...todos];
     setTodos(todos.filter(todo => todo.id !== id));
-    
+
     try {
       await API.delete(`/api/todos/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -124,12 +139,12 @@ const TodoApp = () => {
   const editTodo = async (id, newText) => {
     const todoToEdit = todos.find(todo => todo.id === id);
     if (!todoToEdit) return;
-    
+
     // Optimistic update
-    setTodos(todos.map(todo => 
+    setTodos(todos.map(todo =>
       todo.id === id ? { ...todo, task: newText } : todo
     ));
-    
+
     try {
       await API.put(
         `/api/todos/${id}`,
@@ -139,7 +154,7 @@ const TodoApp = () => {
     } catch (err) {
       console.error('Failed to edit todo', err);
       // Revert if failed
-      setTodos(todos.map(todo => 
+      setTodos(todos.map(todo =>
         todo.id === id ? { ...todo, task: todoToEdit.task } : todo
       ));
     }
@@ -160,8 +175,8 @@ const TodoApp = () => {
             <span className="welcome-text">Hi, {user?.name || user?.email?.split('@')[0]}</span>
           </div>
           <div className="header-actions">
-            <button 
-              className="theme-toggle-btn" 
+            <button
+              className="theme-toggle-btn"
               onClick={toggleTheme}
               aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
             >
@@ -218,7 +233,7 @@ const TodoApp = () => {
           filteredTodos.map(todo => (
             <TodoItem
               key={todo.id}
-              todo={{id: todo.id, text: todo.task, completed: Boolean(todo.completed)}}
+              todo={{ id: todo.id, text: todo.task, completed: Boolean(todo.completed) }}
               onToggle={toggleTodo}
               onDelete={deleteTodo}
               onEdit={editTodo}

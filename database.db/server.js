@@ -9,8 +9,10 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: ['https://modern-to-do-app-eight.vercel.app', 'http://localhost:3000'],
-    credentials: true
+    origin: ['https://modern-to-do-app-eight.vercel.app/auth', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
+    allowedHeaders: ['Content-Type', 'Authorization'] // Specify allowed headers,
+    // credentials: true
 }));
 
 // --- DATABASE TABLES ---
@@ -80,3 +82,6 @@ server.listen(PORT, () => {
     console.log(`Consolidated server running on port ${PORT}`);
     console.log(`WebSocket server available at ws://localhost:${PORT}/ws`);
 });
+
+// const cors = require("cors");
+// app.use(cors());

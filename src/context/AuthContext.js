@@ -4,6 +4,9 @@ import axios from 'axios';
 // Talk directly to the backend — bypasses CRA proxy to avoid 405 errors
 const API = axios.create({ baseURL: 'http://localhost:5000' });
 
+// const API = axios.create({ baseURL: 'http://localhost:3001' });
+
+
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
