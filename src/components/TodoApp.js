@@ -40,25 +40,20 @@ const TodoApp = () => {
         const res = await API.get('/api/todos', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setTodos(res.data);
+        
+        // Defensive check: Ensure res.data is an array
+        if (Array.isArray(res.data)) {
+          setTodos(res.data);
+        } else {
+          console.error('Expected an array of todos but received:', typeof res.data, res.data);
+          setTodos([]); // Fallback to empty array
+        }
       } catch (err) {
         console.error('Failed to fetch todos', err);
+        setTodos([]); // Ensure state is an array even on failure
       }
     };
 
-    // const authToken = localStorage.getItem('jwtToken'); // Or wherever your token is stored
-
-    // axios.get('http://localhost:5000/api/todos', {
-    //   headers: {
-    //     'Authorization': `Bearer ${authToken}` // Ensure this is correctly formatted
-    //   }
-    // })
-    //   .then(response => {
-    //     console.log(response.data);
-    //   })
-    //   .catch(error => {
-    //     console.error('Error fetching todos:', error);
-    //   });
     if (token) {
       fetchTodos();
     }
@@ -160,7 +155,7 @@ const TodoApp = () => {
     }
   };
 
-  const filteredTodos = todos.filter(todo => {
+  const filteredTodos = (Array.isArray(todos) ? todos : []).filter(todo => {
     if (filter === 'active') return !todo.completed;
     if (filter === 'completed') return todo.completed;
     return true; // 'all'

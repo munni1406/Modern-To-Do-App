@@ -12,14 +12,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: [
-    'http://localhost:3000', 
-    'http://127.0.0.1:3000',
-    'https://modern-to-do-app-eight.vercel.app'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+    origin: [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'https://modern-to-do-app-eight.vercel.app'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 // Handle preflight requests for all routes
 app.options('*', cors());
@@ -32,7 +32,7 @@ const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.status(401).json({ error: 'Access denied, token missing!' });
     const token = authHeader.split(' ')[1];
-    
+
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) return res.status(403).json({ error: 'Token is not valid' });
         req.user = user;
@@ -45,7 +45,7 @@ const verifyToken = (req, res, next) => {
 // Signup Route
 app.post('/api/signup', async (req, res) => {
     const { name, email, password } = req.body;
-    
+
     if (!name || !email || !password) {
         console.log('Signup failed: Missing fields');
         return res.status(400).json({ error: 'All fields (name, email, password) are required' });
@@ -55,8 +55,8 @@ app.post('/api/signup', async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        
-        db.run(`INSERT INTO users (name, email, password) VALUES (?, ?, ?)`, [name, email, hashedPassword], function(err) {
+
+        db.run(`INSERT INTO users (name, email, password) VALUES (?, ?, ?)`, [name, email, hashedPassword], function (err) {
             if (err) {
                 console.error(`Database error during signup for ${email}:`, err.message);
                 if (err.message.includes('UNIQUE constraint failed')) {
@@ -64,7 +64,7 @@ app.post('/api/signup', async (req, res) => {
                 }
                 return res.status(500).json({ error: 'Database error during account creation' });
             }
-            
+
             console.log(`User created successfully: ${email} (ID: ${this.lastID})`);
             const token = jwt.sign({ id: this.lastID, email }, SECRET_KEY, { expiresIn: '1h' });
             res.status(201).json({ token, user: { id: this.lastID, name, email } });
@@ -107,7 +107,7 @@ app.post('/api/todos', verifyToken, (req, res) => {
     const { task } = req.body;
     if (!task) return res.status(400).json({ error: 'Task content missing' });
 
-    db.run(`INSERT INTO todos (user_id, task) VALUES (?, ?)`, [req.user.id, task], function(err) {
+    db.run(`INSERT INTO todos (user_id, task) VALUES (?, ?)`, [req.user.id, task], function (err) {
         if (err) return res.status(500).json({ error: 'Database error' });
         res.status(201).json({ id: this.lastID, task, completed: 0 });
     });
@@ -118,20 +118,20 @@ app.put('/api/todos/:id', verifyToken, (req, res) => {
     const { task, completed } = req.body;
     const { id } = req.params;
 
-    db.run(`UPDATE todos SET task = COALESCE(?, task), completed = COALESCE(?, completed) WHERE id = ? AND user_id = ?`, 
-        [task, completed, id, req.user.id], 
-        function(err) {
+    db.run(`UPDATE todos SET task = COALESCE(?, task), completed = COALESCE(?, completed) WHERE id = ? AND user_id = ?`,
+        [task, completed, id, req.user.id],
+        function (err) {
             if (err) return res.status(500).json({ error: 'Database error' });
             if (this.changes === 0) return res.status(404).json({ error: 'Todo not found or unauthorized' });
             res.json({ message: 'Todo updated successfully' });
-    });
+        });
 });
 
 // Delete todo
 app.delete('/api/todos/:id', verifyToken, (req, res) => {
     const { id } = req.params;
 
-    db.run(`DELETE FROM todos WHERE id = ? AND user_id = ?`, [id, req.user.id], function(err) {
+    db.run(`DELETE FROM todos WHERE id = ? AND user_id = ?`, [id, req.user.id], function (err) {
         if (err) return res.status(500).json({ error: 'Database error' });
         if (this.changes === 0) return res.status(404).json({ error: 'Todo not found or unauthorized' });
         res.json({ message: 'Todo deleted successfully' });
@@ -154,4 +154,8 @@ app.get('*', (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+export default app;
