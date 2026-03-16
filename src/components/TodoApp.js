@@ -4,8 +4,8 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import TodoItem from './TodoItem';
 
-// Talk directly to the backend — bypasses CRA proxy to avoid 405 errors
-const API = axios.create({ baseURL: 'http://localhost:5000/api/data' });
+// Use environment variable for API URL in production, or relative path in unified deployment
+const API = axios.create({ baseURL: process.env.REACT_APP_API_URL || '' });
 
 const TodoApp = () => {
   const [todos, setTodos] = useState([]);

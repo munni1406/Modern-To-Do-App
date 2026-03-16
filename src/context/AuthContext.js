@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-// Talk directly to the backend — bypasses CRA proxy to avoid 405 errors
-const API = axios.create({ baseURL: 'http://localhost:5000' });
+// Use environment variable for API URL in production, or relative path in unified deployment
+const API = axios.create({ baseURL: process.env.REACT_APP_API_URL || '' });
 
 // const API = axios.create({ baseURL: 'http://localhost:3001' });
 

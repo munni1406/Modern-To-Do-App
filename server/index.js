@@ -2,12 +2,21 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import db from './database.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: [
+    'http://localhost:3000', 
+    'http://127.0.0.1:3000',
+    'https://modern-to-do-app-eight.vercel.app'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -127,6 +136,22 @@ app.delete('/api/todos/:id', verifyToken, (req, res) => {
         if (this.changes === 0) return res.status(404).json({ error: 'Todo not found or unauthorized' });
         res.json({ message: 'Todo deleted successfully' });
     });
+});
+
+// --- STATIC FILES & SPA SUPPORT ---
+
+// Serve static files from the React build folder
+const buildPath = path.join(__dirname, '../build');
+app.use(express.static(buildPath));
+
+// Catch-all route for client-side routing
+app.get('*', (req, res) => {
+    // Only serve index.html if it exists and request is not for an API
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(buildPath, 'index.html'));
+    } else {
+        res.status(404).json({ error: 'API endpoint not found' });
+    }
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
